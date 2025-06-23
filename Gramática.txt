@@ -1,0 +1,216 @@
+"Start Symbol" = <main>
+
+! -----------------------------------------
+! TERMINAIS
+! -----------------------------------------
+
+{Caracteres} = {Printable} - ["]
+identificador = {Letter}({AlphaNumeric}|[_])*
+numero = '-'?{Number}+('.'{Number}+)?
+digito = {Number}
+cadeiaCaracteres = '"'({Caracteres})*'"' 
+tipo = 'int' | 'float' | 'boolean' | 'string' | 'void'
+valBool = 'true' | 'false'
+
+! -----------------------------------------
+! REGRAS PRINCIPAIS
+! -----------------------------------------
+
+<main> ::= 'class' 'main' '{' <escopoMain> '}'
+         | 
+
+<escopoMain> ::= 'class' identificador '{' <defComeco2> '}' <escopoMain>
+               | <defComeco>
+               | 
+
+<escopoMain2> ::= <comandoPrint> <fim>
+                | <comandoRead> <fim>
+                | <comandoIf> <fim>
+                | <comandoFor> <fim>
+                | <atribvetor> <fim>
+                | <atribMatriz> <fim>
+                | identificador '=' <Expressao> ';' <fim>
+                | <chamadaAtributo> '=' <Expressao> ';' <fim>
+                | <chamadaMetodo> ';' <fim>
+
+<fim> ::= <escopoMain2> 
+       | 
+
+! -------------------------------------------------
+! GRAMÁTICA - COMEÇO
+! -------------------------------------------------
+
+<defComeco> ::= <defConst> <escopoMain>
+              | <defVar> <escopoMain>
+              | <methods> <escopoMain>
+              | <escopoMain2>
+
+<defComeco2> ::= <defVar> <defComeco2>
+               | <methods> <defComeco2>
+               | <escopoMain2>
+               | 
+
+! -------------------------------------------------
+! GRAMÁTICA - Chamada de atributo
+! -------------------------------------------------
+
+<chamadaAtributo> ::= identificador '.' identificador
+                   
+! -------------------------------------------------
+! GRAMÁTICA - Chamada de método
+! -------------------------------------------------
+
+<chamadaMetodo> ::= <classeMetodo> '->' identificador '(' <args> ')'
+<classeMetodo> ::= identificador | 'main'                 
+<args> ::= <listaArgumentos> |
+        
+! -------------------------------------------------
+! GRAMÁTICA - CONST
+! -------------------------------------------------
+<defConst> ::= 'const' '{' <listaConst> '}'
+<listaConst> ::= tipo <listaItens> ';' <listaConst> 
+               | <declVetor>
+               |
+<listaItens> ::= identificador <possFinal> <listaItens2>              
+<listaItens2> ::= ',' identificador <possFinal> <listaItens2> 
+                | 
+<possFinal> ::= '=' <valor> |
+
+! -------------------------------------------------
+! GRAMÁTICA - VARIABLE
+! -------------------------------------------------
+
+<defVar> ::= 'variables' '{' <listaConst> '}'
+
+! -------------------------------------------------
+! FIM - CONSTANTES E VARIÁVEIS
+! -------------------------------------------------
+
+! -----------------------------------------
+! COMANDO DE SAÍDA
+! -----------------------------------------
+<comandoPrint> ::= 'print' '(' <listaArgumentos> ')' ';'
+
+<listaArgumentos> ::= <conteudoPrint> <listaArgumentos2>
+<listaArgumentos2> ::= ',' <conteudoPrint> <listaArgumentos2>
+                     | 
+
+! -----------------------------------------
+! COMANDO DE ENTRADA
+! -----------------------------------------
+<comandoRead> ::= 'read' '(' <listaArgumentosRead> ')' ';'
+
+<listaArgumentosRead> ::= <conteudoRead> <listaArgumentosRead2>
+<listaArgumentosRead2> ::= ',' <conteudoRead> <listaArgumentosRead2>
+                         | 
+
+! -----------------------------------------
+! ESTRUTURAS DE CONTROLE
+! -----------------------------------------
+<comandoIf> ::= 'if' '(' <Expressao> ')' '{' <codigo> '}' <opcionalElse>
+
+<opcionalElse> ::= 'else' '{' <codigo> '}'
+                 |
+
+<comandoFor> ::= 'for' '(' <valor> ';' <Expressao> ';' <Expressao> ')' '{' <codigo> '}'
+
+! -------------------------------------------------
+! GRAMÁTICA - EXPRESSÕES COMPLETAS
+! -------------------------------------------------
+
+<Expressao> ::= <Expressao_Logica>
+
+<Expressao_Logica> ::= <Expressao_Relacional> <Expressao_Logica_Cont>
+<Expressao_Logica_Cont> ::= <Op_Logico> <Expressao_Relacional> <Expressao_Logica_Cont> | 
+
+<Op_Logico> ::= '&&' | '||'
+
+<Expressao_Relacional> ::= <Expressao_Aritmetica> <Expressao_Relacional_Cont>
+<Expressao_Relacional_Cont> ::= <Op_Relacional> <Expressao_Aritmetica> <Expressao_Relacional_Cont> | 
+
+<Op_Relacional> ::= '!=' | '==' | '<' | '<=' | '>' | '>='
+
+<Expressao_Aritmetica> ::= <Termo> <Expressao_Aritmetica_Cont>
+<Expressao_Aritmetica_Cont> ::= <Op_Soma> <Termo> <Expressao_Aritmetica_Cont> | 
+
+<Termo> ::= <Fator> <Termo_Cont>
+<Termo_Cont> ::= <Op_Mult> <Fator> <Termo_Cont> | 
+
+<Fator> ::= <negacao> '(' <Expressao> ')' 
+          | <negacao> <valor> <incr>
+
+<Op_Soma> ::= '+' | '-'
+<Op_Mult> ::= '*' | '/'
+<incr> ::= '++' | '--' |
+<negacao> ::= '!' |
+
+<valor> ::= numero
+          | digito
+          | cadeiaCaracteres
+          | valBool
+          | identificador
+          | <acessoVetor>
+          | <chamadaAtributo>
+          | <chamadaMetodo>
+
+<valorVetor> ::= numero
+               | digito
+               | <acessovetor>
+
+<conteudoPrint> ::= <valor>
+
+<conteudoRead> ::= identificador
+                | <acessoVetor>
+                | <chamadaAtributo>
+
+! --------------------------------------------
+! INICIO MÉTODOS
+! --------------------------------------------
+
+<methods> ::= 'methods' '{' <listaMetodos> '}'
+
+<listaMetodos> ::= tipo identificador '(' <listaParametros> ')' '{' <codigo> '}'
+                 | tipo identificador '(' <listaParametros> ')' '{' <codigo> '}' <listaMetodos>
+
+<listaParametros> ::= tipo identificador 
+                    | tipo identificador ',' <listaParametros>
+                    |
+
+<codigo> ::= <defVar> <codigo>
+          | <comandoPrint> <codigo>
+          | <comandoRead> <codigo>
+          | <comandoIf> <codigo>
+          | 'return' <Expressao> ';'
+          | 'return' ';'
+          | identificador '=' <Expressao> ';' <codigo>
+          | <atribvetor> <codigo>
+          | <atribMatriz> <codigo>
+          | <comandoFor> <codigo>
+          | <chamadaAtributo> '=' <Expressao> ';' <codigo>
+          | <chamadaMetodo> ';' <codigo>
+          |
+
+<declVetor> ::= tipo identificador '[' <declVetor2> ']' <inicializacaoOpt> ';'
+              | tipo identificador '[' <declVetor2> ']' '[' <declVetor2> ']' <inicializacaoOptMatriz> ';' ! alternativa para além do vetor também criar uma matriz
+<declVetor2> ::= digito
+               | numero 
+<inicializacaoOpt> ::= '=' '{' <valores> '}' 
+                      | 
+<valores> ::= <valorVetor> <valores_cont>
+<valores_cont> ::= ',' <valorVetor> <valores_cont>
+                 |       
+
+<atribvetor> ::= <acessovetor> '=' <Expressao> ';'
+
+<acessovetor> ::= identificador '[' numero ']'
+               | identificador '[' digito ']'
+
+<inicializacaoOptMatriz> ::= '=' '{' <linhaMatriz>
+                          |
+                                                            
+<linhaMatriz> ::= '{' <valores> '}' ',' <linhaMatriz>
+                | '{' <valores> '}' '}'
+
+<atribMatriz> ::= <indicesMatriz> '=' <Expressao> ';'        
+               
+<indicesMatriz> ::= identificador '[' digito ']' '[' digito ']'
